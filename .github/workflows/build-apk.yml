@@ -12,6 +12,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare supplied Norvel launcher logo
+        run: |
+          mkdir -p app/src/main/res/drawable
+          base64 --decode assets/norvel_launcher.png.b64 > app/src/main/res/drawable/norvel_launcher.png
+          test -s app/src/main/res/drawable/norvel_launcher.png
+
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
