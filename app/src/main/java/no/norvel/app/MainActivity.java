@@ -20,7 +20,6 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
     private static final String HOME_URL = "https://norvel.no/app/";
-    private static final int APP_SCALE_PERCENT = 95;
     private WebView webView;
 
     @Override
@@ -39,13 +38,8 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-
-        // Norvel already has a responsive viewport meta tag. Keep that viewport,
-        // but do not let WebView's overview mode perform a second fit-to-width pass.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
-        webView.setInitialScale(APP_SCALE_PERCENT);
-
         settings.setTextZoom(100);
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
@@ -53,7 +47,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
@@ -65,15 +59,24 @@ public class MainActivity extends Activity {
         if (deepLink != null && isNorvelUrl(deepLink)) {
             webView.loadUrl(deepLink.toString());
         } else {
-            webView.loadUrl(HOME_URL);
+            webView.loadUrl(HOME_URL + "?android=v32");
         }
+    }
+
+    private void applyAndroidScale(WebView view) {
+        String js = "(function(){" +
+            "var id='norvel-android-scale';" +
+            "var old=document.getElementById(id);if(old)old.remove();" +
+            "var s=document.createElement('style');s.id=id;" +
+            "s.textContent='html{zoom:0.88!important;width:113.636%!important;min-height:113.636%!important;}body{width:100%!important;max-width:none!important;}';" +
+            "document.head.appendChild(s);" +
+            "document.documentElement.setAttribute('data-norvel-android','v32');" +
+        "})();";
+        view.evaluateJavascript(js, null);
     }
 
     private void configureSystemBars() {
         getWindow().setNavigationBarColor(Color.rgb(251, 252, 251));
-
-        // Give the web app a little more vertical room by hiding only the status bar.
-        // The navigation/gesture area remains available to the user.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowInsetsController controller = getWindow().getInsetsController();
             if (controller != null) {
@@ -132,6 +135,12 @@ public class MainActivity extends Activity {
             if (isNorvelUrl(uri)) return false;
             openExternal(uri);
             return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            applyAndroidScale(view);
         }
 
         @Override
