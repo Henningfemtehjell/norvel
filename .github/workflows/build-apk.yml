@@ -12,12 +12,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare verified Norvel launcher logo
+      - name: Fetch official Norvel logo
         run: |
           mkdir -p app/src/main/res/drawable
-          base64 --decode assets/norvel_launcher_v38.jpg.b64 > app/src/main/res/drawable/norvel_launcher.jpg
-          test -s app/src/main/res/drawable/norvel_launcher.jpg
-          file app/src/main/res/drawable/norvel_launcher.jpg
+          curl -fL --retry 3 "https://norvel.no/app/norvel-logo.png?v=38" -o app/src/main/res/drawable/norvel_launcher.png
+          test -s app/src/main/res/drawable/norvel_launcher.png
+          file app/src/main/res/drawable/norvel_launcher.png
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
