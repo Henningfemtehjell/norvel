@@ -2,6 +2,7 @@ package no.norvel.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.net.Uri;
@@ -39,8 +40,8 @@ public class MainActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
-        // Keep a predictable CSS viewport and prevent Android/Samsung font scaling
-        // from being applied on top of Norvel's own responsive typography.
+        // Keep system font scaling from breaking the layout. Norvel's own A+
+        // remains available and is handled with dedicated CSS below.
         settings.setUseWideViewPort(false);
         settings.setLoadWithOverviewMode(false);
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
@@ -60,24 +61,30 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new NorvelClient());
 
-        Uri deepLink = getIntent() != null ? getIntent().getData() : null;
-        if (deepLink != null && isNorvelUrl(deepLink)) {
-            webView.loadUrl(deepLink.toString());
-        } else {
-            webView.loadUrl(HOME_URL + "?android=v34");
+        boolean restored = false;
+        if (savedInstanceState != null) {
+            restored = webView.restoreState(savedInstanceState) != null;
+        }
+
+        if (!restored) {
+            Uri deepLink = getIntent() != null ? getIntent().getData() : null;
+            if (deepLink != null && isNorvelUrl(deepLink)) {
+                webView.loadUrl(deepLink.toString());
+            } else {
+                webView.loadUrl(HOME_URL + "?android=v35");
+            }
         }
     }
 
     private void applyAndroidLayoutFix(WebView view) {
         String js = "(function(){" +
-            "var id='norvel-android-v34';" +
+            "var id='norvel-android-v35';" +
             "var old=document.getElementById(id);if(old)old.remove();" +
             "var s=document.createElement('style');s.id=id;" +
             "s.textContent='" +
               "html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;zoom:.88!important;width:113.636%!important;min-height:113.636%!important;}" +
               "body{width:100%!important;max-width:none!important;overflow-x:hidden!important;}" +
               "#appShell{max-width:590px!important;width:100%!important;}" +
-
               ".topbar{padding:10px 14px!important;gap:8px!important;}" +
               ".brand{min-width:0!important;gap:9px!important;}" +
               ".brand img{width:40px!important;height:40px!important;flex:0 0 40px!important;}" +
@@ -85,15 +92,13 @@ public class MainActivity extends Activity {
               ".brand strong{font-size:20px!important;line-height:1.05!important;white-space:nowrap!important;}" +
               ".brand small{font-size:10.5px!important;line-height:1.2!important;white-space:normal!important;}" +
               ".text-btn{font-size:16px!important;padding:9px 11px!important;flex:0 0 auto!important;}" +
-
               ".page-head{padding:19px 16px 11px!important;}" +
               ".page-head h1{font-size:28px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}" +
               ".page-head p{font-size:14px!important;line-height:1.4!important;}" +
-              ".category-card{min-height:74px!important;padding:14px!important;gap:11px!important;}" +
+              ".category-card{min-height:74px!important;height:auto!important;padding:14px!important;gap:11px!important;}" +
               ".category-card .cat-icon{width:39px!important;height:39px!important;flex-basis:39px!important;}" +
               ".category-card strong{font-size:15.5px!important;line-height:1.22!important;overflow-wrap:anywhere!important;}" +
               ".category-card small{font-size:11.5px!important;line-height:1.3!important;}" +
-
               ".simple-home{padding:22px 15px 106px!important;min-height:auto!important;}" +
               ".simple-home-copy{padding:2px 2px 11px!important;}" +
               ".simple-home-copy h1{font-size:32px!important;line-height:1!important;margin:4px 0 8px!important;overflow-wrap:anywhere!important;}" +
@@ -105,15 +110,12 @@ public class MainActivity extends Activity {
               ".simple-focus-text h2{font-size:23px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}" +
               ".simple-focus-text p{font-size:13.5px!important;line-height:1.38!important;}" +
               ".simple-home-help{font-size:12.5px!important;line-height:1.35!important;margin-top:15px!important;}" +
-
               ".item-card h3{font-size:15px!important;line-height:1.25!important;overflow-wrap:anywhere!important;}" +
               ".item-card p{font-size:12.5px!important;line-height:1.4!important;}" +
               ".detail-section h2{font-size:17px!important;line-height:1.2!important;}" +
               ".detail-section p{font-size:13.5px!important;line-height:1.5!important;}" +
-
               ".nav{font-size:9px!important;line-height:1.15!important;min-width:0!important;}" +
               ".nav b{display:block!important;white-space:normal!important;overflow-wrap:anywhere!important;}" +
-
               ".norvel-intro-overlay{padding:8px!important;}" +
               ".norvel-intro-screen.v27{min-height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important;}" +
               ".v27-brandrow{padding:10px 12px 0!important;gap:8px!important;}" +
@@ -132,17 +134,44 @@ public class MainActivity extends Activity {
               ".v27-ella-label{padding:7px 9px!important;}" +
               ".v27-ella-label strong{font-size:13px!important;}" +
               ".v27-ella-label span{font-size:10px!important;}" +
-
+              "body.large-text .brand strong{font-size:22px!important;}" +
+              "body.large-text .brand small{font-size:12px!important;line-height:1.25!important;}" +
+              "body.large-text .text-btn{font-size:17px!important;background:#173c2f!important;color:#fff!important;}" +
+              "body.large-text .page-head h1{font-size:32px!important;}" +
+              "body.large-text .page-head p{font-size:16px!important;}" +
+              "body.large-text .category-card{min-height:82px!important;}" +
+              "body.large-text .category-card strong{font-size:18px!important;line-height:1.25!important;}" +
+              "body.large-text .category-card small{font-size:13.5px!important;line-height:1.35!important;}" +
+              "body.large-text .simple-home-copy h1{font-size:36px!important;}" +
+              "body.large-text .simple-home-copy p{font-size:17px!important;line-height:1.48!important;}" +
+              "body.large-text .simple-focus-card{min-height:148px!important;}" +
+              "body.large-text .simple-focus-text h2{font-size:26px!important;line-height:1.1!important;}" +
+              "body.large-text .simple-focus-text p{font-size:15.5px!important;line-height:1.45!important;}" +
+              "body.large-text .simple-home-help{font-size:14.5px!important;}" +
+              "body.large-text .item-card h3{font-size:17.5px!important;}" +
+              "body.large-text .item-card p{font-size:14.5px!important;}" +
+              "body.large-text .detail-section h2{font-size:19px!important;}" +
+              "body.large-text .detail-section p{font-size:15.5px!important;}" +
+              "body.large-text .nav{font-size:10.5px!important;}" +
+              "body.large-text .v27-brandrow span{font-size:11.5px!important;}" +
+              "body.large-text .v27-copy h1{font-size:34px!important;}" +
+              "body.large-text .v27-copy p{font-size:15.5px!important;}" +
+              "body.large-text .v27-open{font-size:15px!important;}" +
               "@media(max-width:390px){" +
                 ".brand strong{font-size:18px!important;}" +
                 ".brand small{font-size:9.5px!important;}" +
                 ".simple-home-copy h1{font-size:29px!important;}" +
                 ".simple-focus-text h2{font-size:21px!important;}" +
                 ".page-head h1{font-size:26px!important;}" +
+                "body.large-text .brand strong{font-size:20px!important;}" +
+                "body.large-text .brand small{font-size:11px!important;}" +
+                "body.large-text .simple-home-copy h1{font-size:33px!important;}" +
+                "body.large-text .simple-focus-text h2{font-size:24px!important;}" +
+                "body.large-text .page-head h1{font-size:30px!important;}" +
               "}" +
             "';" +
             "document.head.appendChild(s);" +
-            "document.documentElement.setAttribute('data-norvel-android','v34');" +
+            "document.documentElement.setAttribute('data-norvel-android','v35');" +
         "})();";
         view.evaluateJavascript(js, null);
     }
@@ -231,6 +260,22 @@ public class MainActivity extends Activity {
                 );
             }
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        configureSystemBars();
+        if (webView != null) {
+            webView.requestLayout();
+            applyAndroidLayoutFix(webView);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (webView != null) webView.saveState(outState);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
