@@ -38,9 +38,14 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-        settings.setUseWideViewPort(true);
+
+        // Keep a predictable CSS viewport and prevent Android/Samsung font scaling
+        // from being applied on top of Norvel's own responsive typography.
+        settings.setUseWideViewPort(false);
         settings.setLoadWithOverviewMode(false);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         settings.setTextZoom(100);
+
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
@@ -59,31 +64,85 @@ public class MainActivity extends Activity {
         if (deepLink != null && isNorvelUrl(deepLink)) {
             webView.loadUrl(deepLink.toString());
         } else {
-            webView.loadUrl(HOME_URL + "?android=v33");
+            webView.loadUrl(HOME_URL + "?android=v34");
         }
     }
 
-    private void applyAndroidScale(WebView view) {
+    private void applyAndroidLayoutFix(WebView view) {
         String js = "(function(){" +
-            "var id='norvel-android-scale';" +
+            "var id='norvel-android-v34';" +
             "var old=document.getElementById(id);if(old)old.remove();" +
             "var s=document.createElement('style');s.id=id;" +
             "s.textContent='" +
-              "html{zoom:0.88!important;width:113.636%!important;min-height:113.636%!important;}" +
-              "body{width:100%!important;max-width:none!important;}" +
-              ".simple-home{padding:24px 16px 108px!important;min-height:auto!important;}" +
-              ".simple-home-copy{padding:2px 2px 12px!important;}" +
-              ".simple-home-copy h1{font-size:34px!important;line-height:1!important;margin:4px 0 8px!important;}" +
-              ".simple-home-copy p{font-size:15.5px!important;line-height:1.42!important;}" +
-              ".simple-home-actions{gap:12px!important;margin-top:10px!important;}" +
-              ".simple-focus-card{min-height:142px!important;padding:17px 18px!important;border-radius:22px!important;}" +
-              ".simple-focus-icon{width:48px!important;height:48px!important;border-radius:14px!important;}" +
-              ".simple-focus-text h2{font-size:25px!important;line-height:1.05!important;}" +
-              ".simple-focus-text p{font-size:14px!important;line-height:1.4!important;}" +
-              ".simple-home-help{font-size:13px!important;margin-top:16px!important;}" +
+              "html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;zoom:.88!important;width:113.636%!important;min-height:113.636%!important;}" +
+              "body{width:100%!important;max-width:none!important;overflow-x:hidden!important;}" +
+              "#appShell{max-width:590px!important;width:100%!important;}" +
+
+              ".topbar{padding:10px 14px!important;gap:8px!important;}" +
+              ".brand{min-width:0!important;gap:9px!important;}" +
+              ".brand img{width:40px!important;height:40px!important;flex:0 0 40px!important;}" +
+              ".brand>span,.brand>div{min-width:0!important;}" +
+              ".brand strong{font-size:20px!important;line-height:1.05!important;white-space:nowrap!important;}" +
+              ".brand small{font-size:10.5px!important;line-height:1.2!important;white-space:normal!important;}" +
+              ".text-btn{font-size:16px!important;padding:9px 11px!important;flex:0 0 auto!important;}" +
+
+              ".page-head{padding:19px 16px 11px!important;}" +
+              ".page-head h1{font-size:28px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}" +
+              ".page-head p{font-size:14px!important;line-height:1.4!important;}" +
+              ".category-card{min-height:74px!important;padding:14px!important;gap:11px!important;}" +
+              ".category-card .cat-icon{width:39px!important;height:39px!important;flex-basis:39px!important;}" +
+              ".category-card strong{font-size:15.5px!important;line-height:1.22!important;overflow-wrap:anywhere!important;}" +
+              ".category-card small{font-size:11.5px!important;line-height:1.3!important;}" +
+
+              ".simple-home{padding:22px 15px 106px!important;min-height:auto!important;}" +
+              ".simple-home-copy{padding:2px 2px 11px!important;}" +
+              ".simple-home-copy h1{font-size:32px!important;line-height:1!important;margin:4px 0 8px!important;overflow-wrap:anywhere!important;}" +
+              ".simple-home-copy p{font-size:15px!important;line-height:1.42!important;}" +
+              ".simple-home-actions{gap:11px!important;margin-top:9px!important;}" +
+              ".simple-focus-card{min-height:136px!important;height:auto!important;padding:16px 17px!important;border-radius:21px!important;}" +
+              ".simple-focus-icon{width:46px!important;height:46px!important;border-radius:13px!important;flex:0 0 46px!important;}" +
+              ".simple-focus-text{min-width:0!important;}" +
+              ".simple-focus-text h2{font-size:23px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}" +
+              ".simple-focus-text p{font-size:13.5px!important;line-height:1.38!important;}" +
+              ".simple-home-help{font-size:12.5px!important;line-height:1.35!important;margin-top:15px!important;}" +
+
+              ".item-card h3{font-size:15px!important;line-height:1.25!important;overflow-wrap:anywhere!important;}" +
+              ".item-card p{font-size:12.5px!important;line-height:1.4!important;}" +
+              ".detail-section h2{font-size:17px!important;line-height:1.2!important;}" +
+              ".detail-section p{font-size:13.5px!important;line-height:1.5!important;}" +
+
+              ".nav{font-size:9px!important;line-height:1.15!important;min-width:0!important;}" +
+              ".nav b{display:block!important;white-space:normal!important;overflow-wrap:anywhere!important;}" +
+
+              ".norvel-intro-overlay{padding:8px!important;}" +
+              ".norvel-intro-screen.v27{min-height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important;}" +
+              ".v27-brandrow{padding:10px 12px 0!important;gap:8px!important;}" +
+              ".v27-logo{width:108px!important;max-width:49%!important;}" +
+              ".v27-brandrow span{font-size:10.5px!important;line-height:1.2!important;max-width:145px!important;}" +
+              ".v27-hero{padding:0 12px 12px!important;gap:0!important;}" +
+              ".v27-ella-stage{min-height:220px!important;}" +
+              ".v27-ella{width:min(218px,64vw)!important;}" +
+              ".v27-ella-halo{width:205px!important;height:205px!important;}" +
+              ".v27-copy{padding:0 2px 6px!important;}" +
+              ".v27-kicker{font-size:9.5px!important;margin-bottom:5px!important;}" +
+              ".v27-copy h1{font-size:31px!important;line-height:.98!important;margin-bottom:7px!important;}" +
+              ".v27-copy p{font-size:14px!important;line-height:1.42!important;margin-bottom:10px!important;}" +
+              ".v27-proof{font-size:10.5px!important;line-height:1.3!important;margin-bottom:11px!important;}" +
+              ".v27-open{font-size:14px!important;padding:12px 15px!important;}" +
+              ".v27-ella-label{padding:7px 9px!important;}" +
+              ".v27-ella-label strong{font-size:13px!important;}" +
+              ".v27-ella-label span{font-size:10px!important;}" +
+
+              "@media(max-width:390px){" +
+                ".brand strong{font-size:18px!important;}" +
+                ".brand small{font-size:9.5px!important;}" +
+                ".simple-home-copy h1{font-size:29px!important;}" +
+                ".simple-focus-text h2{font-size:21px!important;}" +
+                ".page-head h1{font-size:26px!important;}" +
+              "}" +
             "';" +
             "document.head.appendChild(s);" +
-            "document.documentElement.setAttribute('data-norvel-android','v33');" +
+            "document.documentElement.setAttribute('data-norvel-android','v34');" +
         "})();";
         view.evaluateJavascript(js, null);
     }
@@ -153,7 +212,7 @@ public class MainActivity extends Activity {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            applyAndroidScale(view);
+            applyAndroidLayoutFix(view);
         }
 
         @Override
