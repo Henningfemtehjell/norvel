@@ -1,6 +1,7 @@
 package no.norvel.app;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -19,10 +20,119 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.json.JSONObject;
+
 public class MainActivity extends Activity {
     private static final String HOME_URL = "https://norvel.no/app/";
-    private static final String NORVEL_LOGO = "https://norvel.no/app/norvel-logo.png";
     private WebView webView;
+
+    private static final String ANDROID_CSS = """
+        html{
+          -webkit-text-size-adjust:100%!important;
+          text-size-adjust:100%!important;
+          zoom:.88!important;
+          width:113.636%!important;
+          min-height:113.636%!important;
+        }
+        body{width:100%!important;max-width:none!important;overflow-x:hidden!important;}
+        #appShell{max-width:590px!important;width:100%!important;}
+
+        .topbar{padding:8px 14px!important;gap:10px!important;align-items:center!important;}
+        .brand{min-width:0!important;display:flex!important;align-items:center!important;padding:0!important;}
+        .brand .norvel-full-brand-logo{
+          width:106px!important;height:auto!important;max-height:72px!important;
+          object-fit:contain!important;border-radius:0!important;display:block!important;
+        }
+        .text-btn{font-size:16px!important;padding:9px 11px!important;flex:0 0 auto!important;}
+
+        .page-head{padding:19px 16px 11px!important;}
+        .page-head h1{font-size:28px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}
+        .page-head p{font-size:14px!important;line-height:1.4!important;}
+        .category-card{min-height:74px!important;height:auto!important;padding:14px!important;gap:11px!important;}
+        .category-card .cat-icon{width:39px!important;height:39px!important;flex-basis:39px!important;}
+        .category-card strong{font-size:15.5px!important;line-height:1.22!important;overflow-wrap:anywhere!important;}
+        .category-card small{font-size:11.5px!important;line-height:1.3!important;}
+
+        .simple-home{padding:22px 15px 106px!important;min-height:auto!important;}
+        .simple-home-copy{padding:2px 2px 11px!important;}
+        .simple-home-copy h1{font-size:32px!important;line-height:1!important;margin:4px 0 8px!important;overflow-wrap:anywhere!important;}
+        .simple-home-copy p{font-size:15px!important;line-height:1.42!important;}
+        .simple-home-actions{gap:11px!important;margin-top:9px!important;}
+        .simple-focus-card{min-height:136px!important;height:auto!important;padding:16px 17px!important;border-radius:21px!important;}
+        .simple-focus-icon{width:46px!important;height:46px!important;border-radius:13px!important;flex:0 0 46px!important;}
+        .simple-focus-text{min-width:0!important;}
+        .simple-focus-text h2{font-size:23px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}
+        .simple-focus-text p{font-size:13.5px!important;line-height:1.38!important;}
+        .simple-home-help{font-size:12.5px!important;line-height:1.35!important;margin-top:15px!important;}
+
+        .item-card h3{font-size:15px!important;line-height:1.25!important;overflow-wrap:anywhere!important;}
+        .item-card p{font-size:12.5px!important;line-height:1.4!important;}
+        .detail-section h2{font-size:17px!important;line-height:1.2!important;}
+        .detail-section p{font-size:13.5px!important;line-height:1.5!important;}
+
+        .nav{font-size:9px!important;line-height:1.15!important;min-width:0!important;}
+        .nav b{display:block!important;white-space:normal!important;overflow-wrap:anywhere!important;}
+
+        .norvel-intro-overlay{padding:8px!important;}
+        .norvel-intro-screen.v27{min-height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important;}
+        .v27-brandrow{padding:10px 12px 0!important;gap:8px!important;}
+        .v27-logo{width:112px!important;height:auto!important;max-width:49%!important;object-fit:contain!important;}
+        .v27-brandrow span{font-size:10.5px!important;line-height:1.2!important;max-width:145px!important;}
+        .v27-hero{padding:0 12px 12px!important;gap:0!important;}
+        .v27-ella-stage{min-height:220px!important;}
+        .v27-ella{width:min(218px,64vw)!important;}
+        .v27-ella-halo{width:205px!important;height:205px!important;}
+        .v27-copy{padding:0 2px 6px!important;}
+        .v27-kicker{font-size:9.5px!important;margin-bottom:5px!important;}
+        .v27-copy h1{font-size:31px!important;line-height:.98!important;margin-bottom:7px!important;}
+        .v27-copy p{font-size:14px!important;line-height:1.42!important;margin-bottom:10px!important;}
+        .v27-proof{font-size:10.5px!important;line-height:1.3!important;margin-bottom:11px!important;}
+        .v27-open{font-size:14px!important;padding:12px 15px!important;}
+        .v27-ella-label{padding:7px 9px!important;}
+        .v27-ella-label strong{font-size:13px!important;}
+        .v27-ella-label span{font-size:10px!important;}
+
+        body.large-text .brand .norvel-full-brand-logo{width:112px!important;}
+        body.large-text .text-btn{font-size:17px!important;background:#173c2f!important;color:#fff!important;}
+        body.large-text .page-head h1{font-size:32px!important;}
+        body.large-text .page-head p{font-size:16px!important;}
+        body.large-text .category-card{min-height:82px!important;}
+        body.large-text .category-card strong{font-size:18px!important;line-height:1.25!important;}
+        body.large-text .category-card small{font-size:13.5px!important;line-height:1.35!important;}
+        body.large-text .simple-home-copy h1{font-size:36px!important;}
+        body.large-text .simple-home-copy p{font-size:17px!important;line-height:1.48!important;}
+        body.large-text .simple-focus-card{min-height:148px!important;}
+        body.large-text .simple-focus-text h2{font-size:26px!important;line-height:1.1!important;}
+        body.large-text .simple-focus-text p{font-size:15.5px!important;line-height:1.45!important;}
+        body.large-text .simple-home-help{font-size:14.5px!important;}
+        body.large-text .item-card h3{font-size:17.5px!important;}
+        body.large-text .item-card p{font-size:14.5px!important;}
+        body.large-text .detail-section h2{font-size:19px!important;}
+        body.large-text .detail-section p{font-size:15.5px!important;}
+        body.large-text .nav{font-size:10.5px!important;}
+        body.large-text .v27-brandrow span{font-size:11.5px!important;}
+        body.large-text .v27-copy h1{font-size:34px!important;}
+        body.large-text .v27-copy p{font-size:15.5px!important;}
+        body.large-text .v27-open{font-size:15px!important;}
+
+        @media(max-width:390px){
+          .brand .norvel-full-brand-logo{width:96px!important;}
+          .simple-home-copy h1{font-size:29px!important;}
+          .simple-focus-text h2{font-size:21px!important;}
+          .page-head h1{font-size:26px!important;}
+          body.large-text .brand .norvel-full-brand-logo{width:102px!important;}
+          body.large-text .simple-home-copy h1{font-size:33px!important;}
+          body.large-text .simple-focus-text h2{font-size:24px!important;}
+          body.large-text .page-head h1{font-size:30px!important;}
+        }
+        """;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        Configuration fixed = new Configuration(newBase.getResources().getConfiguration());
+        fixed.fontScale = 1.0f;
+        super.attachBaseContext(newBase.createConfigurationContext(fixed));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,111 +177,59 @@ public class MainActivity extends Activity {
             if (deepLink != null && isNorvelUrl(deepLink)) {
                 webView.loadUrl(deepLink.toString());
             } else {
-                webView.loadUrl(HOME_URL + "?android=v36");
+                webView.loadUrl(HOME_URL + "?android=v37");
             }
         }
     }
 
     private void applyAndroidLayoutFix(WebView view) {
-        String js = "(function(){" +
-            "var id='norvel-android-v36';" +
-            "var old=document.getElementById(id);if(old)old.remove();" +
-            "var s=document.createElement('style');s.id=id;" +
-            "s.textContent='" +
-              "html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;zoom:.88!important;width:113.636%!important;min-height:113.636%!important;}" +
-              "body{width:100%!important;max-width:none!important;overflow-x:hidden!important;}" +
-              "#appShell{max-width:590px!important;width:100%!important;}" +
-              ".topbar{padding:9px 14px!important;gap:10px!important;}" +
-              ".brand{min-width:0!important;gap:10px!important;align-items:center!important;}" +
-              ".brand img{width:105px!important;height:auto!important;max-height:66px!important;object-fit:contain!important;flex:0 0 auto!important;border-radius:0!important;}" +
-              ".brand>span,.brand>div{min-width:0!important;}" +
-              ".brand strong{display:none!important;}" +
-              ".brand small{display:block!important;font-size:10.5px!important;line-height:1.2!important;white-space:normal!important;color:#68756f!important;max-width:210px!important;}" +
-              ".text-btn{font-size:16px!important;padding:9px 11px!important;flex:0 0 auto!important;}" +
-              ".page-head{padding:19px 16px 11px!important;}" +
-              ".page-head h1{font-size:28px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}" +
-              ".page-head p{font-size:14px!important;line-height:1.4!important;}" +
-              ".category-card{min-height:74px!important;height:auto!important;padding:14px!important;gap:11px!important;}" +
-              ".category-card .cat-icon{width:39px!important;height:39px!important;flex-basis:39px!important;}" +
-              ".category-card strong{font-size:15.5px!important;line-height:1.22!important;overflow-wrap:anywhere!important;}" +
-              ".category-card small{font-size:11.5px!important;line-height:1.3!important;}" +
-              ".simple-home{padding:22px 15px 106px!important;min-height:auto!important;}" +
-              ".simple-home-copy{padding:2px 2px 11px!important;}" +
-              ".simple-home-copy h1{font-size:32px!important;line-height:1!important;margin:4px 0 8px!important;overflow-wrap:anywhere!important;}" +
-              ".simple-home-copy p{font-size:15px!important;line-height:1.42!important;}" +
-              ".simple-home-actions{gap:11px!important;margin-top:9px!important;}" +
-              ".simple-focus-card{min-height:136px!important;height:auto!important;padding:16px 17px!important;border-radius:21px!important;}" +
-              ".simple-focus-icon{width:46px!important;height:46px!important;border-radius:13px!important;flex:0 0 46px!important;}" +
-              ".simple-focus-text{min-width:0!important;}" +
-              ".simple-focus-text h2{font-size:23px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}" +
-              ".simple-focus-text p{font-size:13.5px!important;line-height:1.38!important;}" +
-              ".simple-home-help{font-size:12.5px!important;line-height:1.35!important;margin-top:15px!important;}" +
-              ".item-card h3{font-size:15px!important;line-height:1.25!important;overflow-wrap:anywhere!important;}" +
-              ".item-card p{font-size:12.5px!important;line-height:1.4!important;}" +
-              ".detail-section h2{font-size:17px!important;line-height:1.2!important;}" +
-              ".detail-section p{font-size:13.5px!important;line-height:1.5!important;}" +
-              ".nav{font-size:9px!important;line-height:1.15!important;min-width:0!important;}" +
-              ".nav b{display:block!important;white-space:normal!important;overflow-wrap:anywhere!important;}" +
-              ".norvel-intro-overlay{padding:8px!important;}" +
-              ".norvel-intro-screen.v27{min-height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important;}" +
-              ".v27-brandrow{padding:10px 12px 0!important;gap:8px!important;}" +
-              ".v27-logo{width:112px!important;height:auto!important;max-width:49%!important;object-fit:contain!important;}" +
-              ".v27-brandrow span{font-size:10.5px!important;line-height:1.2!important;max-width:145px!important;}" +
-              ".v27-hero{padding:0 12px 12px!important;gap:0!important;}" +
-              ".v27-ella-stage{min-height:220px!important;}" +
-              ".v27-ella{width:min(218px,64vw)!important;}" +
-              ".v27-ella-halo{width:205px!important;height:205px!important;}" +
-              ".v27-copy{padding:0 2px 6px!important;}" +
-              ".v27-kicker{font-size:9.5px!important;margin-bottom:5px!important;}" +
-              ".v27-copy h1{font-size:31px!important;line-height:.98!important;margin-bottom:7px!important;}" +
-              ".v27-copy p{font-size:14px!important;line-height:1.42!important;margin-bottom:10px!important;}" +
-              ".v27-proof{font-size:10.5px!important;line-height:1.3!important;margin-bottom:11px!important;}" +
-              ".v27-open{font-size:14px!important;padding:12px 15px!important;}" +
-              ".v27-ella-label{padding:7px 9px!important;}" +
-              ".v27-ella-label strong{font-size:13px!important;}" +
-              ".v27-ella-label span{font-size:10px!important;}" +
-              "body.large-text .brand img{width:112px!important;}" +
-              "body.large-text .brand small{font-size:12px!important;line-height:1.25!important;}" +
-              "body.large-text .text-btn{font-size:17px!important;background:#173c2f!important;color:#fff!important;}" +
-              "body.large-text .page-head h1{font-size:32px!important;}" +
-              "body.large-text .page-head p{font-size:16px!important;}" +
-              "body.large-text .category-card{min-height:82px!important;}" +
-              "body.large-text .category-card strong{font-size:18px!important;line-height:1.25!important;}" +
-              "body.large-text .category-card small{font-size:13.5px!important;line-height:1.35!important;}" +
-              "body.large-text .simple-home-copy h1{font-size:36px!important;}" +
-              "body.large-text .simple-home-copy p{font-size:17px!important;line-height:1.48!important;}" +
-              "body.large-text .simple-focus-card{min-height:148px!important;}" +
-              "body.large-text .simple-focus-text h2{font-size:26px!important;line-height:1.1!important;}" +
-              "body.large-text .simple-focus-text p{font-size:15.5px!important;line-height:1.45!important;}" +
-              "body.large-text .simple-home-help{font-size:14.5px!important;}" +
-              "body.large-text .item-card h3{font-size:17.5px!important;}" +
-              "body.large-text .item-card p{font-size:14.5px!important;}" +
-              "body.large-text .detail-section h2{font-size:19px!important;}" +
-              "body.large-text .detail-section p{font-size:15.5px!important;}" +
-              "body.large-text .nav{font-size:10.5px!important;}" +
-              "body.large-text .v27-brandrow span{font-size:11.5px!important;}" +
-              "body.large-text .v27-copy h1{font-size:34px!important;}" +
-              "body.large-text .v27-copy p{font-size:15.5px!important;}" +
-              "body.large-text .v27-open{font-size:15px!important;}" +
-              "@media(max-width:390px){" +
-                ".brand img{width:96px!important;}" +
-                ".brand small{font-size:9.5px!important;max-width:165px!important;}" +
-                ".simple-home-copy h1{font-size:29px!important;}" +
-                ".simple-focus-text h2{font-size:21px!important;}" +
-                ".page-head h1{font-size:26px!important;}" +
-                "body.large-text .brand img{width:102px!important;}" +
-                "body.large-text .brand small{font-size:11px!important;}" +
-                "body.large-text .simple-home-copy h1{font-size:33px!important;}" +
-                "body.large-text .simple-focus-text h2{font-size:24px!important;}" +
-                "body.large-text .page-head h1{font-size:30px!important;}" +
-              "}" +
-            "';" +
-            "document.head.appendChild(s);" +
-            "var brand=document.querySelector('.brand');" +
-            "if(brand){var bi=brand.querySelector('img');if(bi){bi.src='" + NORVEL_LOGO + "';bi.alt='Norvel';}var bs=brand.querySelector('strong');if(bs){bs.style.setProperty('display','none','important');}}" +
-            "var intro=document.querySelector('.v27-logo');if(intro){intro.src='" + NORVEL_LOGO + "';intro.alt='Norvel';}" +
-            "document.documentElement.setAttribute('data-norvel-android','v36');" +
-        "})();";
+        String css = JSONObject.quote(ANDROID_CSS);
+        String js = """
+            (function(){
+              var styleId='norvel-android-v37';
+              var old=document.getElementById(styleId);
+              if(old) old.remove();
+              var s=document.createElement('style');
+              s.id=styleId;
+              s.textContent=%s;
+              document.head.appendChild(s);
+
+              function getLogoSrc(){
+                var intro=document.querySelector('.v27-logo');
+                if(intro && intro.src) return intro.src;
+                try { return new URL('norvel-logo.png', document.baseURI).href; }
+                catch(e){ return 'norvel-logo.png'; }
+              }
+
+              function ensureNorvelBrand(){
+                var src=getLogoSrc();
+                var intro=document.querySelector('.v27-logo');
+                if(intro && intro.getAttribute('src')!=='norvel-logo.png') intro.src=src;
+
+                var brand=document.querySelector('.brand');
+                if(brand){
+                  var existing=brand.querySelector('.norvel-full-brand-logo');
+                  if(!existing || brand.children.length!==1){
+                    brand.innerHTML='';
+                    var img=document.createElement('img');
+                    img.className='norvel-full-brand-logo';
+                    img.alt='Norvel';
+                    img.src=src;
+                    brand.appendChild(img);
+                  }else if(existing.src!==src){
+                    existing.src=src;
+                  }
+                }
+              }
+
+              ensureNorvelBrand();
+              if(!window.__norvelBrandObserver){
+                window.__norvelBrandObserver=new MutationObserver(function(){ensureNorvelBrand();});
+                window.__norvelBrandObserver.observe(document.documentElement,{childList:true,subtree:true});
+              }
+              document.documentElement.setAttribute('data-norvel-android','v37');
+            })();
+            """.formatted(css);
         view.evaluateJavascript(js, null);
     }
 
@@ -210,7 +268,8 @@ public class MainActivity extends Activity {
     private boolean isNorvelUrl(Uri uri) {
         if (uri == null) return false;
         String host = uri.getHost();
-        return "https".equalsIgnoreCase(uri.getScheme()) && host != null && (host.equalsIgnoreCase("norvel.no") || host.endsWith(".norvel.no"));
+        return "https".equalsIgnoreCase(uri.getScheme()) && host != null &&
+                (host.equalsIgnoreCase("norvel.no") || host.endsWith(".norvel.no"));
     }
 
     private void openExternal(Uri uri) {
@@ -240,7 +299,12 @@ public class MainActivity extends Activity {
             if (request.isForMainFrame()) {
                 view.loadDataWithBaseURL(
                     HOME_URL,
-                    "<html><head><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{font-family:sans-serif;background:#f7f9f8;color:#173c2f;padding:32px}button{background:#173c2f;color:white;border:0;border-radius:14px;padding:14px 18px;font-weight:700}</style></head><body><h2>Norvel er ikke tilgjengelig akkurat nå</h2><p>Sjekk internettforbindelsen og prøv igjen.</p><button onclick=\"location.href='https://norvel.no/app/'\">Prøv igjen</button></body></html>",
+                    "<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>" +
+                    "<style>body{font-family:sans-serif;background:#f7f9f8;color:#173c2f;padding:32px}" +
+                    "button{background:#173c2f;color:white;border:0;border-radius:14px;padding:14px 18px;font-weight:700}</style>" +
+                    "</head><body><h2>Norvel er ikke tilgjengelig akkurat nå</h2>" +
+                    "<p>Sjekk internettforbindelsen og prøv igjen.</p>" +
+                    "<button onclick=\"location.href='https://norvel.no/app/'\">Prøv igjen</button></body></html>",
                     "text/html", "UTF-8", null
                 );
             }
@@ -249,9 +313,12 @@ public class MainActivity extends Activity {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+        Configuration fixed = new Configuration(newConfig);
+        fixed.fontScale = 1.0f;
+        super.onConfigurationChanged(fixed);
         configureSystemBars();
         if (webView != null) {
+            webView.getSettings().setTextZoom(100);
             webView.requestLayout();
             applyAndroidLayoutFix(webView);
         }
