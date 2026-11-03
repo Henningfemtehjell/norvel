@@ -21,12 +21,12 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
     private static final String HOME_URL = "https://norvel.no/app/";
+    private static final String NORVEL_LOGO = "https://norvel.no/app/norvel-logo.png";
     private WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         configureSystemBars();
 
         webView = new WebView(this);
@@ -39,14 +39,10 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-
-        // Keep system font scaling from breaking the layout. Norvel's own A+
-        // remains available and is handled with dedicated CSS below.
         settings.setUseWideViewPort(false);
         settings.setLoadWithOverviewMode(false);
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         settings.setTextZoom(100);
-
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
@@ -71,26 +67,26 @@ public class MainActivity extends Activity {
             if (deepLink != null && isNorvelUrl(deepLink)) {
                 webView.loadUrl(deepLink.toString());
             } else {
-                webView.loadUrl(HOME_URL + "?android=v35");
+                webView.loadUrl(HOME_URL + "?android=v36");
             }
         }
     }
 
     private void applyAndroidLayoutFix(WebView view) {
         String js = "(function(){" +
-            "var id='norvel-android-v35';" +
+            "var id='norvel-android-v36';" +
             "var old=document.getElementById(id);if(old)old.remove();" +
             "var s=document.createElement('style');s.id=id;" +
             "s.textContent='" +
               "html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;zoom:.88!important;width:113.636%!important;min-height:113.636%!important;}" +
               "body{width:100%!important;max-width:none!important;overflow-x:hidden!important;}" +
               "#appShell{max-width:590px!important;width:100%!important;}" +
-              ".topbar{padding:10px 14px!important;gap:8px!important;}" +
-              ".brand{min-width:0!important;gap:9px!important;}" +
-              ".brand img{width:40px!important;height:40px!important;flex:0 0 40px!important;}" +
+              ".topbar{padding:9px 14px!important;gap:10px!important;}" +
+              ".brand{min-width:0!important;gap:10px!important;align-items:center!important;}" +
+              ".brand img{width:105px!important;height:auto!important;max-height:66px!important;object-fit:contain!important;flex:0 0 auto!important;border-radius:0!important;}" +
               ".brand>span,.brand>div{min-width:0!important;}" +
-              ".brand strong{font-size:20px!important;line-height:1.05!important;white-space:nowrap!important;}" +
-              ".brand small{font-size:10.5px!important;line-height:1.2!important;white-space:normal!important;}" +
+              ".brand strong{display:none!important;}" +
+              ".brand small{display:block!important;font-size:10.5px!important;line-height:1.2!important;white-space:normal!important;color:#68756f!important;max-width:210px!important;}" +
               ".text-btn{font-size:16px!important;padding:9px 11px!important;flex:0 0 auto!important;}" +
               ".page-head{padding:19px 16px 11px!important;}" +
               ".page-head h1{font-size:28px!important;line-height:1.08!important;overflow-wrap:anywhere!important;}" +
@@ -119,7 +115,7 @@ public class MainActivity extends Activity {
               ".norvel-intro-overlay{padding:8px!important;}" +
               ".norvel-intro-screen.v27{min-height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important;}" +
               ".v27-brandrow{padding:10px 12px 0!important;gap:8px!important;}" +
-              ".v27-logo{width:108px!important;max-width:49%!important;}" +
+              ".v27-logo{width:112px!important;height:auto!important;max-width:49%!important;object-fit:contain!important;}" +
               ".v27-brandrow span{font-size:10.5px!important;line-height:1.2!important;max-width:145px!important;}" +
               ".v27-hero{padding:0 12px 12px!important;gap:0!important;}" +
               ".v27-ella-stage{min-height:220px!important;}" +
@@ -134,7 +130,7 @@ public class MainActivity extends Activity {
               ".v27-ella-label{padding:7px 9px!important;}" +
               ".v27-ella-label strong{font-size:13px!important;}" +
               ".v27-ella-label span{font-size:10px!important;}" +
-              "body.large-text .brand strong{font-size:22px!important;}" +
+              "body.large-text .brand img{width:112px!important;}" +
               "body.large-text .brand small{font-size:12px!important;line-height:1.25!important;}" +
               "body.large-text .text-btn{font-size:17px!important;background:#173c2f!important;color:#fff!important;}" +
               "body.large-text .page-head h1{font-size:32px!important;}" +
@@ -158,12 +154,12 @@ public class MainActivity extends Activity {
               "body.large-text .v27-copy p{font-size:15.5px!important;}" +
               "body.large-text .v27-open{font-size:15px!important;}" +
               "@media(max-width:390px){" +
-                ".brand strong{font-size:18px!important;}" +
-                ".brand small{font-size:9.5px!important;}" +
+                ".brand img{width:96px!important;}" +
+                ".brand small{font-size:9.5px!important;max-width:165px!important;}" +
                 ".simple-home-copy h1{font-size:29px!important;}" +
                 ".simple-focus-text h2{font-size:21px!important;}" +
                 ".page-head h1{font-size:26px!important;}" +
-                "body.large-text .brand strong{font-size:20px!important;}" +
+                "body.large-text .brand img{width:102px!important;}" +
                 "body.large-text .brand small{font-size:11px!important;}" +
                 "body.large-text .simple-home-copy h1{font-size:33px!important;}" +
                 "body.large-text .simple-focus-text h2{font-size:24px!important;}" +
@@ -171,7 +167,10 @@ public class MainActivity extends Activity {
               "}" +
             "';" +
             "document.head.appendChild(s);" +
-            "document.documentElement.setAttribute('data-norvel-android','v35');" +
+            "var brand=document.querySelector('.brand');" +
+            "if(brand){var bi=brand.querySelector('img');if(bi){bi.src='" + NORVEL_LOGO + "';bi.alt='Norvel';}var bs=brand.querySelector('strong');if(bs){bs.style.setProperty('display','none','important');}}" +
+            "var intro=document.querySelector('.v27-logo');if(intro){intro.src='" + NORVEL_LOGO + "';intro.alt='Norvel';}" +
+            "document.documentElement.setAttribute('data-norvel-android','v36');" +
         "})();";
         view.evaluateJavascript(js, null);
     }
@@ -182,19 +181,12 @@ public class MainActivity extends Activity {
             WindowInsetsController controller = getWindow().getInsetsController();
             if (controller != null) {
                 controller.hide(WindowInsets.Type.statusBars());
-                controller.setSystemBarsBehavior(
-                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                );
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             }
         } else {
-            getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
-            );
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                );
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
             }
         }
     }
@@ -218,9 +210,7 @@ public class MainActivity extends Activity {
     private boolean isNorvelUrl(Uri uri) {
         if (uri == null) return false;
         String host = uri.getHost();
-        return "https".equalsIgnoreCase(uri.getScheme())
-                && host != null
-                && (host.equalsIgnoreCase("norvel.no") || host.endsWith(".norvel.no"));
+        return "https".equalsIgnoreCase(uri.getScheme()) && host != null && (host.equalsIgnoreCase("norvel.no") || host.endsWith(".norvel.no"));
     }
 
     private void openExternal(Uri uri) {
@@ -250,12 +240,7 @@ public class MainActivity extends Activity {
             if (request.isForMainFrame()) {
                 view.loadDataWithBaseURL(
                     HOME_URL,
-                    "<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>" +
-                    "<style>body{font-family:sans-serif;background:#f7f9f8;color:#173c2f;padding:32px}" +
-                    "button{background:#173c2f;color:white;border:0;border-radius:14px;padding:14px 18px;font-weight:700}</style>" +
-                    "</head><body><h2>Norvel er ikke tilgjengelig akkurat nå</h2>" +
-                    "<p>Sjekk internettforbindelsen og prøv igjen.</p>" +
-                    "<button onclick=\"location.href='https://norvel.no/app/'\">Prøv igjen</button></body></html>",
+                    "<html><head><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{font-family:sans-serif;background:#f7f9f8;color:#173c2f;padding:32px}button{background:#173c2f;color:white;border:0;border-radius:14px;padding:14px 18px;font-weight:700}</style></head><body><h2>Norvel er ikke tilgjengelig akkurat nå</h2><p>Sjekk internettforbindelsen og prøv igjen.</p><button onclick=\"location.href='https://norvel.no/app/'\">Prøv igjen</button></body></html>",
                     "text/html", "UTF-8", null
                 );
             }
