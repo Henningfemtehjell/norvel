@@ -12,11 +12,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare supplied Norvel launcher logo
+      - name: Prepare verified Norvel launcher logo
         run: |
           mkdir -p app/src/main/res/drawable
-          base64 --decode assets/norvel_launcher.png.b64 > app/src/main/res/drawable/norvel_launcher.png
-          test -s app/src/main/res/drawable/norvel_launcher.png
+          base64 --decode assets/norvel_launcher_v38.jpg.b64 > app/src/main/res/drawable/norvel_launcher.jpg
+          test -s app/src/main/res/drawable/norvel_launcher.jpg
+          file app/src/main/res/drawable/norvel_launcher.jpg
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -38,10 +39,10 @@ jobs:
         run: gradle :app:assembleDebug
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk norvel.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk norvel-v38.apk
 
       - name: Upload Norvel APK
         uses: actions/upload-artifact@v4
         with:
-          name: norvel-apk
-          path: norvel.apk
+          name: norvel-v38-apk
+          path: norvel-v38.apk
