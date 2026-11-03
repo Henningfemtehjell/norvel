@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
         if (deepLink != null && isNorvelUrl(deepLink)) {
             webView.loadUrl(deepLink.toString());
         } else {
-            webView.loadUrl(HOME_URL + "?android=v32");
+            webView.loadUrl(HOME_URL + "?android=v33");
         }
     }
 
@@ -68,9 +68,22 @@ public class MainActivity extends Activity {
             "var id='norvel-android-scale';" +
             "var old=document.getElementById(id);if(old)old.remove();" +
             "var s=document.createElement('style');s.id=id;" +
-            "s.textContent='html{zoom:0.88!important;width:113.636%!important;min-height:113.636%!important;}body{width:100%!important;max-width:none!important;}';" +
+            "s.textContent='" +
+              "html{zoom:0.88!important;width:113.636%!important;min-height:113.636%!important;}" +
+              "body{width:100%!important;max-width:none!important;}" +
+              ".simple-home{padding:24px 16px 108px!important;min-height:auto!important;}" +
+              ".simple-home-copy{padding:2px 2px 12px!important;}" +
+              ".simple-home-copy h1{font-size:34px!important;line-height:1!important;margin:4px 0 8px!important;}" +
+              ".simple-home-copy p{font-size:15.5px!important;line-height:1.42!important;}" +
+              ".simple-home-actions{gap:12px!important;margin-top:10px!important;}" +
+              ".simple-focus-card{min-height:142px!important;padding:17px 18px!important;border-radius:22px!important;}" +
+              ".simple-focus-icon{width:48px!important;height:48px!important;border-radius:14px!important;}" +
+              ".simple-focus-text h2{font-size:25px!important;line-height:1.05!important;}" +
+              ".simple-focus-text p{font-size:14px!important;line-height:1.4!important;}" +
+              ".simple-home-help{font-size:13px!important;margin-top:16px!important;}" +
+            "';" +
             "document.head.appendChild(s);" +
-            "document.documentElement.setAttribute('data-norvel-android','v32');" +
+            "document.documentElement.setAttribute('data-norvel-android','v33');" +
         "})();";
         view.evaluateJavascript(js, null);
     }
