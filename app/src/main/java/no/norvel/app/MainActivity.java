@@ -3,9 +3,14 @@ package no.norvel.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -15,27 +20,34 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
     private static final String HOME_URL = "https://norvel.no/app/";
+    private static final int APP_SCALE_PERCENT = 95;
     private WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(Color.rgb(23, 60, 47));
-        getWindow().setNavigationBarColor(Color.rgb(251, 252, 251));
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
+        configureSystemBars();
 
         webView = new WebView(this);
+        webView.setBackgroundColor(Color.rgb(251, 252, 251));
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         setContentView(webView);
+        applySafeInsets();
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-        settings.setLoadWithOverviewMode(true);
+
+        // Norvel already has a responsive viewport meta tag. Keep that viewport,
+        // but do not let WebView's overview mode perform a second fit-to-width pass.
         settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(false);
+        webView.setInitialScale(APP_SCALE_PERCENT);
+
+        settings.setTextZoom(100);
+        settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setAllowFileAccess(false);
@@ -54,6 +66,48 @@ public class MainActivity extends Activity {
             webView.loadUrl(deepLink.toString());
         } else {
             webView.loadUrl(HOME_URL);
+        }
+    }
+
+    private void configureSystemBars() {
+        getWindow().setNavigationBarColor(Color.rgb(251, 252, 251));
+
+        // Give the web app a little more vertical room by hiding only the status bar.
+        // The navigation/gesture area remains available to the user.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.statusBars());
+                controller.setSystemBarsBehavior(
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                );
+            }
+        } else {
+            getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            );
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                );
+            }
+        }
+    }
+
+    private void applySafeInsets() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            webView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
+                Insets nav = windowInsets.getInsets(WindowInsets.Type.navigationBars());
+                Insets cutout = windowInsets.getInsets(WindowInsets.Type.displayCutout());
+                int left = Math.max(nav.left, cutout.left);
+                int right = Math.max(nav.right, cutout.right);
+                int top = cutout.top;
+                int bottom = Math.max(nav.bottom, cutout.bottom);
+                view.setPadding(left, top, right, bottom);
+                return windowInsets;
+            });
+            webView.requestApplyInsets();
         }
     }
 
