@@ -7,7 +7,7 @@
         android:allowBackup="true"
         android:icon="@drawable/norvel_launcher"
         android:roundIcon="@drawable/norvel_launcher"
-        android:label="Norvel"
+        android:label="Norvel V38"
         android:supportsRtl="true"
         android:theme="@style/Theme.Norvel"
         android:usesCleartextTraffic="false">
